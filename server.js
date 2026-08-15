@@ -15,7 +15,7 @@ function makeRoomCode() {
   do {
     code = "";
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       code += chars[Math.floor(Math.random() * chars.length)];
     }
 
