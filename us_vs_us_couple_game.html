@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Us vs Us ❤️</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+    background:linear-gradient(135deg,#fff0f5,#f7efff 50%,#fff8ec);
+    color:#30233a;min-height:100vh;overflow-x:hidden
+  }
+  .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .heart{position:absolute;font-size:22px;animation:float 8s linear infinite;opacity:.25}
+  @keyframes float{from{transform:translateY(110vh) rotate(0)}to{transform:translateY(-15vh) rotate(360deg)}}
+  .app{position:relative;z-index:1;max-width:900px;margin:auto;padding:18px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .logo{font-weight:900;font-size:clamp(24px,6vw,40px);letter-spacing:-1.5px}
+  .logo span{color:#ff4f87}
+  button{
+    border:0;border-radius:16px;padding:13px 18px;font-weight:800;cursor:pointer;
+    background:#fff;box-shadow:0 8px 24px #6b42641c;color:#39273f;transition:.18s
+  }
+  button:hover{transform:translateY(-2px)}
+  button:active{transform:scale(.97)}
+  .setup,.game,.modal{background:#ffffffd9;backdrop-filter:blur(14px);border:1px solid #fff;border-radius:28px;box-shadow:0 18px 55px #6b426421}
+  .setup{padding:28px;margin-top:20px;text-align:center}
+  h1,h2,p{margin-top:0}
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}
+  input{width:100%;padding:16px;border:2px solid #f0ddea;border-radius:15px;font-size:16px;outline:none}
+  input:focus{border-color:#ff79a5}
+  .primary{background:linear-gradient(135deg,#ff4f87,#a86cff);color:#fff;font-size:17px;padding:15px 28px}
+  .game{padding:18px;margin-top:18px}
+  .scoreboard{display:grid;grid-template-columns:1fr 90px 1fr;gap:10px;align-items:center}
+  .player{padding:15px;border-radius:20px;background:#fff6fa;text-align:center}
+  .player.b{background:#f7f1ff}
+  .avatar{font-size:30px}.score{font-size:32px;font-weight:900}
+  .vs{text-align:center;font-weight:900;color:#ff4f87}
+  .levelbar{margin:18px 0 8px;display:flex;justify-content:space-between;font-size:13px;font-weight:800}
+  .bar{height:10px;background:#eee6ee;border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:linear-gradient(90deg,#ff4f87,#a86cff);width:0;transition:.5s}
+  .turn{text-align:center;margin:22px 0 10px;color:#80647f;font-weight:800}
+  .card{background:linear-gradient(145deg,#fff,#fff8fb);border:2px solid #f5dce8;border-radius:24px;padding:28px 20px;text-align:center;min-height:245px;display:flex;flex-direction:column;justify-content:center}
+  .category{display:inline-block;margin:auto;padding:7px 12px;border-radius:99px;background:#ffe2ec;color:#d9346b;font-size:12px;font-weight:900}
+  .challenge{font-size:clamp(23px,5vw,34px);font-weight:900;line-height:1.2;margin:18px auto}
+  .points{color:#9b75b0;font-weight:800}
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .actions button{min-width:145px}
+  .success{background:#20a36a;color:white}.no{background:#fff0f3;color:#c03962}
+  .next{background:#32253a;color:#fff}
+  .history{margin-top:16px;padding:14px;background:#fff;border-radius:18px}
+  .history summary{font-weight:900;cursor:pointer}
+  .history li{margin:8px 0;font-size:14px}
+  .hidden{display:none!important}
+  .modalWrap{position:fixed;inset:0;background:#24182caa;display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}
+  .modal{max-width:520px;width:100%;padding:30px;text-align:center;animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .winner{font-size:70px}
+  .small{font-size:13px;color:#826b80}
+  .shake{animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-5px)}}
+  .confetti{position:fixed;top:-15px;font-size:22px;z-index:10;animation:fall 2.3s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(700deg);opacity:0}}
+  @media(max-width:600px){.names{grid-template-columns:1fr}.scoreboard{grid-template-columns:1fr 55px 1fr}.player{padding:10px}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<div class="hearts" id="hearts"></div>
+<div class="app">
+  <div class="top">
+    <div class="logo">Us <span>vs</span> Us ❤️</div>
+    <button id="restartBtn" class="hidden" onclick="resetGame()">↻ Restart</button>
+  </div>
+
+  <section class="setup" id="setup">
+    <div style="font-size:62px">💑</div>
+    <h1>Funny. Romantic. Competitive.</h1>
+    <p>Two people. One relationship. Absolutely no mercy. 😂❤️</p>
+    <div class="names">
+      <input id="nameA" placeholder="Player 1 — e.g. Peter" maxlength="18">
+      <input id="nameB" placeholder="Player 2 — e.g. Love" maxlength="18">
+    </div>
+    <button class="primary" onclick="startGame()">Start Our Game 💕</button>
+    <p class="small" style="margin-top:14px">Best played together on one phone or over a video call.</p>
+  </section>
+
+  <section class="game hidden" id="game">
+    <div class="scoreboard">
+      <div class="player"><div class="avatar">🧑</div><b id="nameDisplayA">Player 1</b><div class="score" id="scoreA">0</div></div>
+      <div class="vs">VS</div>
+      <div class="player b"><div class="avatar">👩</div><b id="nameDisplayB">Player 2</b><div class="score" id="scoreB">0</div></div>
+    </div>
+
+    <div class="levelbar"><span id="levelText">Level 1 • Getting Cute</span><span id="progressText">0 / 50</span></div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+
+    <div class="turn" id="turn">Player 1's turn</div>
+
+    <div class="card" id="card">
+      <div class="category" id="category">READY?</div>
+      <div class="challenge" id="challenge">Tap “Random Challenge” to begin!</div>
+      <div class="points" id="points">Earn Love Points ❤️</div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="randomBtn" onclick="randomChallenge()">🎲 Random Challenge</button>
+      <button class="success hidden" id="completeBtn" onclick="completeChallenge()">✓ Completed!</button>
+      <button class="no hidden" id="skipBtn" onclick="skipChallenge()">😂 Skip</button>
+    </div>
+
+    <details class="history">
+      <summary>📜 Game history</summary>
+      <ol id="history"></ol>
+    </details>
+  </section>
+</div>
+
+<div class="modalWrap hidden" id="modal">
+  <div class="modal">
+    <div class="winner" id="winnerEmoji">🏆</div>
+    <h2 id="winnerTitle">We have a winner!</h2>
+    <p id="winnerText"></p>
+    <button class="primary" onclick="resetGame()">Play Again ❤️</button>
+  </div>
+</div>
+
+<script>
+const challenges = [
+ {cat:"❤️ ROMANCE", text:"Tell your partner one thing you genuinely love about them.", pts:2},
+ {cat:"❤️ ROMANCE", text:"Describe your perfect date together in exactly 20 seconds.", pts:3},
+ {cat:"❤️ ROMANCE", text:"Give your partner a new romantic nickname. It must be ridiculous.", pts:2},
+ {cat:"❤️ ROMANCE", text:"Look into each other's eyes for 30 seconds without laughing.", pts:3},
+ {cat:"❤️ ROMANCE", text:"Name your favourite memory together and explain why it matters.", pts:2},
+ {cat:"😂 MAKE ME LAUGH", text:"You have 30 seconds to make your partner laugh without touching them.", pts:3},
+ {cat:"😂 MAKE ME LAUGH", text:"Imitate your partner for 20 seconds. They must guess what you're doing.", pts:3},
+ {cat:"😂 MAKE ME LAUGH", text:"Give a dramatic movie-trailer voice-over about your relationship.", pts:3},
+ {cat:"😂 MAKE ME LAUGH", text:"Pretend you are meeting your partner for the first time. Flirt with them.", pts:3},
+ {cat:"🎨 CREATIVE", text:"Design your imaginary couple superhero in 45 seconds. Give them a superpower.", pts:3},
+ {cat:"🎨 CREATIVE", text:"Invent a restaurant for couples. Name it and create its signature dish.", pts:3},
+ {cat:"🎨 CREATIVE", text:"Create a ridiculous business you could start together.", pts:3},
+ {cat:"🎨 CREATIVE", text:"Draw your dream home together using only 60 seconds.", pts:3},
+ {cat:"🔥 WHO IS MORE LIKELY?", text:"Who is more likely to spend €500 on something completely unnecessary?", pts:2},
+ {cat:"🔥 WHO IS MORE LIKELY?", text:"Who would survive longer in a zombie apocalypse?", pts:2},
+ {cat:"🔥 WHO IS MORE LIKELY?", text:"Who is more dramatic during an argument?", pts:2},
+ {cat:"🔥 WHO IS MORE LIKELY?", text:"Who would accidentally become famous?", pts:2},
+ {cat:"🔥 WHO IS MORE LIKELY?", text:"Who would fall asleep first during a movie?", pts:2},
+ {cat:"💋 COUPLE CHALLENGE", text:"Give your partner a 10-second romantic compliment using only movie quotes.", pts:3},
+ {cat:"💋 COUPLE CHALLENGE", text:"Send your partner a 5-second voice note saying something ridiculously romantic.", pts:3},
+ {cat:"💋 COUPLE CHALLENGE", text:"Recreate your first date using only five words.", pts:3},
+ {cat:"💋 COUPLE CHALLENGE", text:"Choose a place you want to travel together and pitch it like a travel influencer.", pts:3},
+ {cat:"🃏 CHAOS", text:"KISS TAX! Give your partner a kiss before continuing. ❤️", pts:2},
+ {cat:"🃏 CHAOS", text:"ROAST ME! Lovingly roast your partner for 30 seconds.", pts:3},
+ {cat:"🃏 CHAOS", text:"ACTING CHALLENGE! Pretend you're arguing over who gets the last slice of pizza.", pts:3},
+ {cat:"🃏 CHAOS", text:"DATE BET! The winner of this round chooses your next date activity.", pts:3}
+];
+
+let A={name:"Player 1",score:0}, B={name:"Player 2",score:0};
+let turn=0, current=null, active=false, used=[];
+
+function makeHearts(){
+ for(let i=0;i<16;i++){
+   const h=document.createElement('div');h.className='heart';h.textContent=['❤️','💕','💗','✨'][i%4];
+   h.style.left=(Math.random()*100)+'%';h.style.animationDelay=(-Math.random()*8)+'s';h.style.animationDuration=(6+Math.random()*6)+'s';
+   document.getElementById('hearts').appendChild(h);
+ }
+}
+makeHearts();
+
+function startGame(){
+ A.name=document.getElementById('nameA').value.trim()||"Player 1";
+ B.name=document.getElementById('nameB').value.trim()||"Player 2";
+ A.score=B.score=0;turn=0;used=[];active=true;
+ document.getElementById('setup').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ document.getElementById('restartBtn').classList.remove('hidden');
+ document.getElementById('nameDisplayA').textContent=A.name;
+ document.getElementById('nameDisplayB').textContent=B.name;
+ update();
+}
+
+function update(){
+ document.getElementById('scoreA').textContent=A.score;
+ document.getElementById('scoreB').textContent=B.score;
+ const total=Math.min(50,Math.max(A.score,B.score));
+ document.getElementById('fill').style.width=(total/50*100)+'%';
+ document.getElementById('progressText').textContent=total+' / 50';
+ const level=total<10?1:total<20?2:total<30?3:total<40?4:5;
+ const labels=['Getting Cute','Flirty Mode','Chaos Couple','Power Couple','LEGENDARY LOVE'];
+ document.getElementById('levelText').textContent=`Level ${level} • ${labels[level-1]}`;
+ document.getElementById('turn').textContent=`${turn===0?A.name:B.name}'s turn`;
+}
+
+function randomChallenge(){
+ if(used.length===challenges.length) used=[];
+ let idx;
+ do{idx=Math.floor(Math.random()*challenges.length)}while(used.includes(idx)&&used.length<challenges.length);
+ used.push(idx);current=challenges[idx];
+ document.getElementById('category').textContent=current.cat;
+ document.getElementById('challenge').textContent=current.text;
+ document.getElementById('points').textContent=`+${current.pts} Love Points ❤️`;
+ document.getElementById('randomBtn').classList.add('hidden');
+ document.getElementById('completeBtn').classList.remove('hidden');
+ document.getElementById('skipBtn').classList.remove('hidden');
+ document.getElementById('card').classList.remove('shake');void document.getElementById('card').offsetWidth;document.getElementById('card').classList.add('shake');
+}
+
+function completeChallenge(){
+ if(!current)return;
+ const p=turn===0?A:B;p.score+=current.pts;
+ addHistory(`❤️ ${p.name} completed “${current.text}” (+${current.pts})`);
+ confetti();
+ current=null;turn=1-turn;
+ resetButtons();update();
+ if(p.score>=50)finish(p);
+}
+function skipChallenge(){
+ if(!current)return;
+ addHistory(`😂 ${turn===0?A.name:B.name} skipped a challenge`);
+ current=null;turn=1-turn;resetButtons();update();
+}
+function resetButtons(){
+ document.getElementById('randomBtn').classList.remove('hidden');
+ document.getElementById('completeBtn').classList.add('hidden');
+ document.getElementById('skipBtn').classList.add('hidden');
+ document.getElementById('category').textContent='READY?';
+ document.getElementById('challenge').textContent='Tap “Random Challenge” to begin!';
+ document.getElementById('points').textContent='Earn Love Points ❤️';
+}
+function addHistory(t){
+ const li=document.createElement('li');li.textContent=t;document.getElementById('history').prepend(li);
+}
+function confetti(){
+ for(let i=0;i<28;i++){
+  const c=document.createElement('div');c.className='confetti';c.textContent=['❤️','💕','✨','🎉','💗'][i%5];
+  c.style.left=Math.random()*100+'vw';c.style.animationDelay=Math.random()*.35+'s';
+  document.body.appendChild(c);setTimeout(()=>c.remove(),2800);
+ }
+}
+function finish(p){
+ document.getElementById('winnerEmoji').textContent='🏆❤️';
+ document.getElementById('winnerTitle').textContent=`${p.name} wins!`;
+ document.getElementById('winnerText').textContent=`${p.name} reached 50 Love Points. Now the winner gets to choose the romantic prize/date! 😏`;
+ document.getElementById('modal').classList.remove('hidden');active=false;
+}
+function resetGame(){
+ document.getElementById('modal').classList.add('hidden');
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('setup').classList.remove('hidden');
+ document.getElementById('restartBtn').classList.add('hidden');
+ document.getElementById('history').innerHTML='';
+}
+</script>
+</body>
+</html>

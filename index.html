@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Us vs Us 2.0 ❤️</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:linear-gradient(135deg,#fff0f6,#f3edff);color:#34253b;min-height:100vh}
+main{max-width:760px;margin:auto;padding:20px}.box{background:#ffffffdd;backdrop-filter:blur(12px);border-radius:28px;padding:26px;box-shadow:0 20px 60px #6b426422;margin-top:18px;text-align:center}
+h1{font-size:42px;margin:5px}h1 span{color:#ff4f87}input{padding:15px;border:2px solid #efdce8;border-radius:14px;width:100%;font-size:16px;margin:7px 0}
+button{border:0;border-radius:14px;padding:14px 20px;font-weight:800;cursor:pointer;margin:5px;background:#32253a;color:white}.pink{background:linear-gradient(135deg,#ff4f87,#a86cff)}
+.row{display:flex;gap:10px}.row>*{flex:1}.scores{display:grid;grid-template-columns:1fr 60px 1fr;gap:10px;align-items:center}.score{font-size:34px;font-weight:900}.p{padding:12px;border-radius:18px;background:#fff4f8}.p2{background:#f5f0ff}
+.card{margin:20px 0;padding:28px;border:2px solid #f2dce8;border-radius:22px;min-height:230px;display:flex;flex-direction:column;justify-content:center}.cat{font-weight:900;color:#d83c70}.challenge{font-size:27px;font-weight:900;margin:15px 0}.muted{color:#806d7e}.code{font-size:38px;letter-spacing:7px;font-weight:900;color:#ff4f87}.hidden{display:none}.status{font-weight:800;margin:12px}
+@media(max-width:600px){.row{flex-direction:column}.challenge{font-size:23px}}
+</style></head><body><main>
+<div class="box" id="home"><div style="font-size:60px">💑</div><h1>Us <span>vs</span> Us 2.0</h1><p>Real-time couple game • two phones • one room ❤️</p>
+<input id="name" placeholder="Your name"><div class="row"><button class="pink" onclick="create()">Create Room</button><button onclick="showJoin()">Join Room</button></div>
+<div id="join" class="hidden"><input id="code" placeholder="5-letter room code" maxlength="5"><button class="pink" onclick="join()">Join ❤️</button></div></div>
+<div class="box hidden" id="lobby"><h2>Room <span class="code" id="roomCode"></span></h2><p id="lobbyText">Share the code with your girlfriend/boyfriend.</p><div id="players"></div></div>
+<div class="box hidden" id="game"><div class="scores"><div class="p"><b id="n0"></b><div class="score" id="s0">0</div></div><b>VS</b><div class="p p2"><b id="n1"></b><div class="score" id="s1">0</div></div></div>
+<div class="status" id="turn"></div><div class="card"><div class="cat" id="cat">READY</div><div class="challenge" id="ch">Waiting for both players…</div><div class="muted" id="pts"></div></div>
+<button class="pink" id="random" onclick="randomChallenge()">🎲 Random Challenge</button><button class="hidden" id="done" onclick="done()">✓ Completed!</button><button class="hidden" id="skip" onclick="nextTurn()">😂 Skip</button></div>
+</main><script>
+const challenges=[
+["❤️ ROMANCE","Tell your partner one thing you genuinely love about them.",2],["😂 FUNNY","Imitate your partner for 20 seconds.",3],["🎨 CREATIVE","Invent a ridiculous business you could start together.",3],["🔥 WHO IS MORE LIKELY?","Who would spend €500 on something unnecessary? Both point at someone!",2],["💋 COUPLE","Look into each other's eyes for 30 seconds without laughing.",3],["😂 FUNNY","Pretend you are meeting for the first time and flirt with each other.",3],["❤️ ROMANCE","Describe your perfect date together in 20 seconds.",3],["🎨 CREATIVE","Design your couple superhero and give them a superpower.",3],["🃏 CHAOS","ROAST ME! Lovingly roast your partner for 30 seconds.",3],["💋 COUPLE","Recreate your first date using only five words.",3],["❤️ ROMANCE","Name your favourite memory together and explain why.",2],["😂 FUNNY","Give a dramatic movie-trailer voice-over about your relationship.",3],["🃏 CHAOS","KISS TAX! Give your partner a kiss before continuing. ❤️",2]
+];
+let ws,me=0,turn=0,current=null,players=[{name:"",score:0},{name:"",score:0}];
+function connect(){ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host);ws.onmessage=e=>handle(JSON.parse(e.data))}
+function create(){me=0;connect();setTimeout(()=>ws.send(JSON.stringify({type:"create",name:document.getElementById("name").value||"Player 1"})),250)}
+function showJoin(){document.getElementById("join").classList.remove("hidden")}
+function join(){me=1;connect();setTimeout(()=>ws.send(JSON.stringify({type:"join",code:document.getElementById("code").value,name:document.getElementById("name").value||"Player 2"})),250)}
+function handle(m){
+ if(m.type==="error")return alert(m.message);
+ if(m.type==="room"){document.getElementById("home").classList.add("hidden");document.getElementById("lobby").classList.remove("hidden");document.getElementById("roomCode").textContent=m.code;players[0]=m.players[0];renderLobby()}
+ if(m.type==="players"){players=m.players;renderLobby()}
+ if(m.type==="ready"){document.getElementById("lobby").classList.add("hidden");document.getElementById("game").classList.remove("hidden");render()}
+ if(m.type==="challenge"){current=m.challenge;turn=m.turn;showChallenge()}
+ if(m.type==="state"){players=m.players;turn=m.turn;render();showReady()}
+ if(m.type==="winner"){alert("🏆 "+players[m.player].name+" wins! 50 Love Points! ❤️")}
+ if(m.type==="left"){alert("Your partner left the room.");location.reload()}
+}
+function renderLobby(){document.getElementById("players").innerHTML=players.map(p=>"❤️ "+p.name).join("<br>");}
+function render(){n0.textContent=players[0].name;s0.textContent=players[0].score;n1.textContent=players[1].name;s1.textContent=players[1].score;turnEl()}
+function turnEl(){document.getElementById("turn").textContent=(turn===me?"🔥 YOUR TURN":"⏳ "+players[turn].name+"'s turn")}
+function randomChallenge(){if(turn!==me)return alert("Wait for your turn ❤️");current=challenges[Math.floor(Math.random()*challenges.length)];ws.send(JSON.stringify({type:"challenge",challenge:current,turn}));}
+function showChallenge(){cat.textContent=current[0];ch.textContent=current[1];pts.textContent="+"+current[2]+" Love Points ❤️";random.classList.add("hidden");done.classList.remove("hidden");skip.classList.remove("hidden");turnEl()}
+function done(){if(turn!==me)return;ws.send(JSON.stringify({type:"score",player:me,points:current[2]}));}
+function nextTurn(){ws.send(JSON.stringify({type:"score",player:me,points:0}));}
+function showReady(){current=null;cat.textContent="READY";ch.textContent="Tap Random Challenge when it is your turn!";pts.textContent="";random.classList.remove("hidden");done.classList.add("hidden");skip.classList.add("hidden");turnEl()}
+</script></body></html>
